@@ -2,117 +2,148 @@ package main
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
-// Config as init
-type Config struct {
-	Token  string string `json ", omitempty", c`
-}
-
-// Options types for ahrefs
-type Options struct {
-	Target string `json ", omitempty"`
-	Mode string `json ", omitempty"`
-	Where string `json ", omitempty"`
-	Having string `json ", omitempty"`
-	OrderBy string `json "order_by, omitempty"`
-	Limit string `json ", omitempty"`
-}
+type (
+	// Config as init
+	Config struct {
+		Token string
+	}
+)
 
 // NewAhrefsAPI initialised the ahrefs api
 func NewAhrefsAPI(c Config) *Config {
 	return &c
 }
 
-func getURL(method, target, mode string, c Config) string {
+func getURL(method, target, mode, token string) string {
 	baseURL := "https://apiv2.ahrefs.com"
+	defaultOutputType := "json"
 
-	return fmt.Sprintf("%s?from=%s&target=%s&mode=%s", baseURL, method, target, mode)
+	return fmt.Sprintf("%s?token=%s&from=%s&target=%s&ouput=%s&mode=%s", baseURL, token, method, target, defaultOutputType, mode)
 }
 
-func ahrefsRank(target, mode string, c Config) string {
-	return getURL("ahrefs_rank", target, mode, c)
+func ahrefsRank(target, mode, token string) string {
+	return getURL("ahrefs_rank", target, mode, token)
 }
 
-func anchors(target, mode string, c Config):
-	return getURL("anchors", target, mode, c)
+func anchors(target, mode, token string) string {
+	return getURL("anchors", target, mode, token)
+}
 
-func anchorsRefdomains(target, mode string, c Config):
-	return getURL("anchors_refdomains", target, mode, c)
+func anchorsRefdomains(target, mode, token string) string {
+	return getURL("anchors_refdomains", target, mode, token)
+}
 
-func backlinks(target, mode string, c Config):
-	return getURL("backlinks", target, mode, c)
+func backlinks(target, mode, token string) string {
+	return getURL("backlinks", target, mode, token)
+}
 
-func backlinksNewLost(target, mode string, c Config):
-	return getURL("backlinks_new_lost", target, mode, c)
+func backlinksNewLost(target, mode, token string) string {
+	return getURL("backlinks_new_lost", target, mode, token)
+}
 
-func backlinksNewLost_counters(target, mode string, c Config):
-	return getURL("backlinks_new_lost_counters", target, mode, c)
+func backlinksNewLostCounters(target, mode, token string) string {
+	return getURL("backlinks_new_lost_counters", target, mode, token)
+}
 
-func backlinksOnePer_domain(target, mode string, c Config):
-	return getURL("backlinks_one_per_domain", target, mode, c)
+func backlinksOnePerDomain(target, mode, token string) string {
+	return getURL("backlinks_one_per_domain", target, mode, token)
+}
 
-func brokenBacklinks(target, mode string, c Config):
-	return getURL("broken_backlinks", target, mode, c)
+func brokenBacklinks(target, mode, token string) string {
+	return getURL("broken_backlinks", target, mode, token)
+}
 
-func brokenLinks(target, mode string, c Config):
-	return getURL("broken_links", target, mode, c)
+func brokenLinks(target, mode, token string) string {
+	return getURL("broken_links", target, mode, token)
+}
 
-func domainRating(target, mode string, c Config):
-	return getURL("domain_rating", target, mode, c)
+func domainRating(target, mode, token string) string {
+	return getURL("domain_rating", target, mode, token)
+}
 
-func linkedAnchors(target, mode string, c Config):
-	return getURL("linked_anchors", target, mode, c)
+func linkedAnchors(target, mode, token string) string {
+	return getURL("linked_anchors", target, mode, token)
+}
 
-func linkedDomains(target, mode string, c Config):
-	return getURL("linked_domains", target, mode, c)
+func linkedDomains(target, mode, token string) string {
+	return getURL("linked_domains", target, mode, token)
+}
 
-func linkedDomains_by_type(target, mode string, c Config):
-	return getURL("linked_domains_by_type", target, mode, c)
+func linkedDomainsByType(target, mode, token string) string {
+	return getURL("linked_domains_by_type", target, mode, token)
+}
 
-func metrics(target, mode string, c Config):
-	return getURL("metrics", target, mode, c)
+func metrics(target, mode, token string) string {
+	return getURL("metrics", target, mode, token)
+}
 
-func metrics_extended(target, mode string, c Config):
-	return getURL("metrics_extended", target, mode, c)
+func metricsExtended(target, mode, token string) string {
+	return getURL("metrics_extended", target, mode, token)
+}
 
-func pages(target, mode string, c Config):
-	return getURL("pages", target, mode, c)
+func pages(target, mode, token string) string {
+	return getURL("pages", target, mode, token)
+}
 
-func pagesExtended(target, mode string, c Config):
-	return getURL("pages_extended", target, mode, c)
+func pagesExtended(target, mode, token string) string {
+	return getURL("pages_extended", target, mode, token)
+}
 
-func pagesInfo(target, mode string, c Config):
-	return getURL("pages_info", target, mode, c)
+func pagesInfo(target, mode, token string) string {
+	return getURL("pages_info", target, mode, token)
+}
 
-func refdomains(target, mode string, c Config):
-	return getURL("refdomains", target, mode, c)
+func refdomains(target, mode, token string) string {
+	return getURL("refdomains", target, mode, token)
+}
 
-func refdomainsByType(target, mode string, c Config):
-	return getURL("refdomains_by_type", target, mode, c)
+func refdomainsByType(target, mode, token string) string {
+	return getURL("refdomains_by_type", target, mode, token)
+}
 
-func refdomainsNewLost(target, mode string, c Config):
-	return getURL("refdomains_new_lost", target, mode, c)
+func refdomainsNewLost(target, mode, token string) string {
+	return getURL("refdomains_new_lost", target, mode, token)
+}
 
-func refdomainsNewLostCounters(target, mode string, c Config):
-	return getURL("refdomains_new_lost_counters", target, mode, c)
+func refdomainsNewLostCounters(target, mode, token string) string {
+	return getURL("refdomains_new_lost_counters", target, mode, token)
+}
 
-func refips(target, mode string, c Config):
-	return getURL("refips", target, mode, c)
+func refips(target, mode, token string) string {
+	return getURL("refips", target, mode, token)
+}
 
-func subscriptionInfo(target, mode string, c Config):
-	return getURL("subscription_info", target, mode, c)
+func subscriptionInfo(target, mode, token string) string {
+	return getURL("subscription_info", target, mode, token)
+}
 
 func main() {
 	err := godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
+	if err != nil {
+		log.Fatal("Error loading .env file")
 	}
 
 	api := NewAhrefsAPI(Config{Token: os.Getenv("AHREFS_TOKEN")})
 
-	fmt.Println(ahrefsRank("ahrefs.com", "domain", *api))
+	fmt.Println(ahrefsRank("ahrefs.com", "domain", *&api.Token))
+
+	resp, err := http.Get(ahrefsRank("ahrefs.com", "domain", *&api.Token))
+	if err != nil {
+		log.Fatal("Error calling the page")
+	}
+
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(responseData))
 }
