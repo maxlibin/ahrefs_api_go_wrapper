@@ -24,9 +24,9 @@ func NewAhrefsAPI(c Config) *Config {
 
 func getURL(method, target, mode, token string) string {
 	baseURL := "https://apiv2.ahrefs.com"
-	defaultOutputType := "json"
+	outputType := "json"
 
-	return fmt.Sprintf("%s?token=%s&from=%s&target=%s&ouput=%s&mode=%s", baseURL, token, method, target, defaultOutputType, mode)
+	return fmt.Sprintf("%s?token=%s&from=%s&target=%s&ouput=%s&mode=%s", baseURL, token, method, target, outputType, mode)
 }
 
 func ahrefsRank(target, mode, token string) string {
@@ -123,6 +123,23 @@ func refips(target, mode, token string) string {
 
 func subscriptionInfo(target, mode, token string) string {
 	return getURL("subscription_info", target, mode, token)
+
+}
+
+/* Request allows you to get decoded data from the api as Json format using stdlib http get */
+func request(req string) string {
+	resp, err := http.Get(req)
+
+	if err != nil {
+		log.Fatal("Error calling the page")
+	}
+
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(responseData)
 }
 
 func main() {
@@ -133,17 +150,5 @@ func main() {
 
 	api := NewAhrefsAPI(Config{Token: os.Getenv("AHREFS_TOKEN")})
 
-	fmt.Println(ahrefsRank("ahrefs.com", "domain", *&api.Token))
-
-	resp, err := http.Get(ahrefsRank("ahrefs.com", "domain", *&api.Token))
-	if err != nil {
-		log.Fatal("Error calling the page")
-	}
-
-	responseData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(responseData))
+	fmt.Println(request(ahrefsRank("ahrefs.com", "domain", *&api.Token)))
 }
