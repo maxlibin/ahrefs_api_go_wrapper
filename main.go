@@ -14,116 +14,121 @@ type (
 	// Config as init
 	Config struct {
 		Token string
+		Ouput string
+	}
+
+	// Request for ahrefs data quries
+	Request struct {
+		Target, Mode   string
+		Limit, OrderBy string `json:",omitempty"`
 	}
 )
 
 // NewAhrefsAPI initialised the ahrefs api
-func NewAhrefsAPI(c Config) *Config {
-	return &c
+func NewAhrefsAPI(token string) Config {
+	return Config{Token: token, Ouput: "json"}
 }
 
-func getURL(method, target, mode, token string) string {
+func getURL(method string, r Request, c Config) string {
 	baseURL := "https://apiv2.ahrefs.com"
-	outputType := "json"
 
-	return fmt.Sprintf("%s?token=%s&from=%s&target=%s&ouput=%s&mode=%s", baseURL, token, method, target, outputType, mode)
+	return fmt.Sprintf("%s?token=%s&from=%s&target=%s&ouput=%s&mode=%s", baseURL, c.Token, method, r.Target, c.Ouput, r.Mode)
 }
 
-func ahrefsRank(target, mode, token string) string {
-	return getURL("ahrefs_rank", target, mode, token)
+func ahrefsRank(r Request, c Config) string {
+	return getURL("ahrefs_rank", r, c)
 }
 
-func anchors(target, mode, token string) string {
-	return getURL("anchors", target, mode, token)
+func anchors(r Request, c Config) string {
+	return getURL("anchors", r, c)
 }
 
-func anchorsRefdomains(target, mode, token string) string {
-	return getURL("anchors_refdomains", target, mode, token)
+func anchorsRefdomains(r Request, c Config) string {
+	return getURL("anchors_refdomains", r, c)
 }
 
-func backlinks(target, mode, token string) string {
-	return getURL("backlinks", target, mode, token)
+func backlinks(r Request, c Config) string {
+	return getURL("backlinks", r, c)
 }
 
-func backlinksNewLost(target, mode, token string) string {
-	return getURL("backlinks_new_lost", target, mode, token)
+func backlinksNewLost(r Request, c Config) string {
+	return getURL("backlinks_new_lost", r, c)
 }
 
-func backlinksNewLostCounters(target, mode, token string) string {
-	return getURL("backlinks_new_lost_counters", target, mode, token)
+func backlinksNewLostCounters(r Request, c Config) string {
+	return getURL("backlinks_new_lost_counters", r, c)
 }
 
-func backlinksOnePerDomain(target, mode, token string) string {
-	return getURL("backlinks_one_per_domain", target, mode, token)
+func backlinksOnePerDomain(r Request, c Config) string {
+	return getURL("backlinks_one_per_domain", r, c)
 }
 
-func brokenBacklinks(target, mode, token string) string {
-	return getURL("broken_backlinks", target, mode, token)
+func brokenBacklinks(r Request, c Config) string {
+	return getURL("broken_backlinks", r, c)
 }
 
-func brokenLinks(target, mode, token string) string {
-	return getURL("broken_links", target, mode, token)
+func brokenLinks(r Request, c Config) string {
+	return getURL("broken_links", r, c)
 }
 
-func domainRating(target, mode, token string) string {
-	return getURL("domain_rating", target, mode, token)
+func domainRating(r Request, c Config) string {
+	return getURL("domain_rating", r, c)
 }
 
-func linkedAnchors(target, mode, token string) string {
-	return getURL("linked_anchors", target, mode, token)
+func linkedAnchors(r Request, c Config) string {
+	return getURL("linked_anchors", r, c)
 }
 
-func linkedDomains(target, mode, token string) string {
-	return getURL("linked_domains", target, mode, token)
+func linkedDomains(r Request, c Config) string {
+	return getURL("linked_domains", r, c)
 }
 
-func linkedDomainsByType(target, mode, token string) string {
-	return getURL("linked_domains_by_type", target, mode, token)
+func linkedDomainsByType(r Request, c Config) string {
+	return getURL("linked_domains_by_type", r, c)
 }
 
-func metrics(target, mode, token string) string {
-	return getURL("metrics", target, mode, token)
+func metrics(r Request, c Config) string {
+	return getURL("metrics", r, c)
 }
 
-func metricsExtended(target, mode, token string) string {
-	return getURL("metrics_extended", target, mode, token)
+func metricsExtended(r Request, c Config) string {
+	return getURL("metrics_extended", r, c)
 }
 
-func pages(target, mode, token string) string {
-	return getURL("pages", target, mode, token)
+func pages(r Request, c Config) string {
+	return getURL("pages", r, c)
 }
 
-func pagesExtended(target, mode, token string) string {
-	return getURL("pages_extended", target, mode, token)
+func pagesExtended(r Request, c Config) string {
+	return getURL("pages_extended", r, c)
 }
 
-func pagesInfo(target, mode, token string) string {
-	return getURL("pages_info", target, mode, token)
+func pagesInfo(r Request, c Config) string {
+	return getURL("pages_info", r, c)
 }
 
-func refdomains(target, mode, token string) string {
-	return getURL("refdomains", target, mode, token)
+func refdomains(r Request, c Config) string {
+	return getURL("refdomains", r, c)
 }
 
-func refdomainsByType(target, mode, token string) string {
-	return getURL("refdomains_by_type", target, mode, token)
+func refdomainsByType(r Request, c Config) string {
+	return getURL("refdomains_by_type", r, c)
 }
 
-func refdomainsNewLost(target, mode, token string) string {
-	return getURL("refdomains_new_lost", target, mode, token)
+func refdomainsNewLost(r Request, c Config) string {
+	return getURL("refdomains_new_lost", r, c)
 }
 
-func refdomainsNewLostCounters(target, mode, token string) string {
-	return getURL("refdomains_new_lost_counters", target, mode, token)
+func refdomainsNewLostCounters(r Request, c Config) string {
+	return getURL("refdomains_new_lost_counters", r, c)
 }
 
-func refips(target, mode, token string) string {
-	return getURL("refips", target, mode, token)
+func refips(r Request, c Config) string {
+	return getURL("refips", r, c)
 }
 
-func subscriptionInfo(target, mode, token string) string {
-	return getURL("subscription_info", target, mode, token)
-
+func subscriptionInfo(r Request, c Config) string {
+	return getURL("subscription_info", r, c)
 }
 
 /* Request allows you to get decoded data from the api as Json format using stdlib http get */
@@ -148,7 +153,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	api := NewAhrefsAPI(Config{Token: os.Getenv("AHREFS_TOKEN")})
+	config := NewAhrefsAPI(os.Getenv("AHREFS_TOKEN"))
 
-	fmt.Println(request(ahrefsRank("ahrefs.com", "domain", *&api.Token)))
+	fmt.Println(request(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, config)))
 }
