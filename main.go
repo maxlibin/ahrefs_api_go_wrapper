@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/google/go-querystring/query"
 	"github.com/joho/godotenv"
 )
 
@@ -19,8 +20,10 @@ type (
 
 	// Request for ahrefs data quries
 	Request struct {
-		Target, Mode   string
-		Limit, OrderBy string `json:",omitempty"`
+		Target  string `url:"target"`
+		Mode    string `url:"mode"`
+		Limit   int    `url:"limit,omitempty"`
+		OrderBy string `url:"order_by,omitempty"`
 	}
 )
 
@@ -29,105 +32,107 @@ func NewAhrefsAPI(token string) Config {
 	return Config{Token: token, Ouput: "json"}
 }
 
-func getURL(method string, r Request, c Config) string {
+func getURL(method string, r Request, c *Config) string {
 	baseURL := "https://apiv2.ahrefs.com"
 
-	return fmt.Sprintf("%s?token=%s&from=%s&target=%s&ouput=%s&mode=%s", baseURL, c.Token, method, r.Target, c.Ouput, r.Mode)
+	query, _ := query.Values(r)
+
+	return fmt.Sprintf("%s?token=%s&from=%s&%s", baseURL, c.Token, method, query.Encode())
 }
 
-func ahrefsRank(r Request, c Config) string {
+func ahrefsRank(r Request, c *Config) string {
 	return getURL("ahrefs_rank", r, c)
 }
 
-func anchors(r Request, c Config) string {
+func anchors(r Request, c *Config) string {
 	return getURL("anchors", r, c)
 }
 
-func anchorsRefdomains(r Request, c Config) string {
+func anchorsRefdomains(r Request, c *Config) string {
 	return getURL("anchors_refdomains", r, c)
 }
 
-func backlinks(r Request, c Config) string {
+func backlinks(r Request, c *Config) string {
 	return getURL("backlinks", r, c)
 }
 
-func backlinksNewLost(r Request, c Config) string {
+func backlinksNewLost(r Request, c *Config) string {
 	return getURL("backlinks_new_lost", r, c)
 }
 
-func backlinksNewLostCounters(r Request, c Config) string {
+func backlinksNewLostCounters(r Request, c *Config) string {
 	return getURL("backlinks_new_lost_counters", r, c)
 }
 
-func backlinksOnePerDomain(r Request, c Config) string {
+func backlinksOnePerDomain(r Request, c *Config) string {
 	return getURL("backlinks_one_per_domain", r, c)
 }
 
-func brokenBacklinks(r Request, c Config) string {
+func brokenBacklinks(r Request, c *Config) string {
 	return getURL("broken_backlinks", r, c)
 }
 
-func brokenLinks(r Request, c Config) string {
+func brokenLinks(r Request, c *Config) string {
 	return getURL("broken_links", r, c)
 }
 
-func domainRating(r Request, c Config) string {
+func domainRating(r Request, c *Config) string {
 	return getURL("domain_rating", r, c)
 }
 
-func linkedAnchors(r Request, c Config) string {
+func linkedAnchors(r Request, c *Config) string {
 	return getURL("linked_anchors", r, c)
 }
 
-func linkedDomains(r Request, c Config) string {
+func linkedDomains(r Request, c *Config) string {
 	return getURL("linked_domains", r, c)
 }
 
-func linkedDomainsByType(r Request, c Config) string {
+func linkedDomainsByType(r Request, c *Config) string {
 	return getURL("linked_domains_by_type", r, c)
 }
 
-func metrics(r Request, c Config) string {
+func metrics(r Request, c *Config) string {
 	return getURL("metrics", r, c)
 }
 
-func metricsExtended(r Request, c Config) string {
+func metricsExtended(r Request, c *Config) string {
 	return getURL("metrics_extended", r, c)
 }
 
-func pages(r Request, c Config) string {
+func pages(r Request, c *Config) string {
 	return getURL("pages", r, c)
 }
 
-func pagesExtended(r Request, c Config) string {
+func pagesExtended(r Request, c *Config) string {
 	return getURL("pages_extended", r, c)
 }
 
-func pagesInfo(r Request, c Config) string {
+func pagesInfo(r Request, c *Config) string {
 	return getURL("pages_info", r, c)
 }
 
-func refdomains(r Request, c Config) string {
+func refdomains(r Request, c *Config) string {
 	return getURL("refdomains", r, c)
 }
 
-func refdomainsByType(r Request, c Config) string {
+func refdomainsByType(r Request, c *Config) string {
 	return getURL("refdomains_by_type", r, c)
 }
 
-func refdomainsNewLost(r Request, c Config) string {
+func refdomainsNewLost(r Request, c *Config) string {
 	return getURL("refdomains_new_lost", r, c)
 }
 
-func refdomainsNewLostCounters(r Request, c Config) string {
+func refdomainsNewLostCounters(r Request, c *Config) string {
 	return getURL("refdomains_new_lost_counters", r, c)
 }
 
-func refips(r Request, c Config) string {
+func refips(r Request, c *Config) string {
 	return getURL("refips", r, c)
 }
 
-func subscriptionInfo(r Request, c Config) string {
+func subscriptionInfo(r Request, c *Config) string {
 	return getURL("subscription_info", r, c)
 }
 
@@ -155,5 +160,5 @@ func main() {
 
 	config := NewAhrefsAPI(os.Getenv("AHREFS_TOKEN"))
 
-	fmt.Println(request(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, config)))
+	fmt.Println(request(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config)))
 }
