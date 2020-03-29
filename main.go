@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -25,6 +27,17 @@ type (
 		Limit   int    `url:"limit,omitempty"`
 		OrderBy string `url:"order_by,omitempty"`
 	}
+
+	// AhrefsRankList - get ahrefs rank item
+	AhrefsRankList struct {
+		URL string `json:"url"`
+		AR  int    `json:"ahrefs_rank"`
+	}
+
+	// AhrefsRank - get ahrefs rank item
+	AhrefsRank struct {
+		Pages []AhrefsRankList
+	}
 )
 
 // NewAhrefsAPI initialised the ahrefs api
@@ -40,8 +53,33 @@ func getURL(method string, r Request, c *Config) string {
 	return fmt.Sprintf("%s?token=%s&from=%s&%s", baseURL, c.Token, method, query.Encode())
 }
 
-func ahrefsRank(r Request, c *Config) string {
-	return getURL("ahrefs_rank", r, c)
+/* Request allows you to get decoded data from the api as Json format using stdlib http get */
+func request(req string) []byte {
+	resp, err := http.Get(req)
+
+	if err != nil {
+		log.Fatal("Error calling the page")
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return body
+}
+
+func ahrefsRank(r Request, c *Config) *AhrefsRank {
+	responseData := request(getURL("ahrefs_rank", r, c))
+
+	ahrefsRank := &AhrefsRank{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+	err := decoder.Decode(&AhrefsRank{})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return ahrefsRank
 }
 
 func anchors(r Request, c *Config) string {
@@ -136,22 +174,6 @@ func subscriptionInfo(r Request, c *Config) string {
 	return getURL("subscription_info", r, c)
 }
 
-/* Request allows you to get decoded data from the api as Json format using stdlib http get */
-func request(req string) string {
-	resp, err := http.Get(req)
-
-	if err != nil {
-		log.Fatal("Error calling the page")
-	}
-
-	responseData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return string(responseData)
-}
-
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -160,5 +182,5 @@ func main() {
 
 	config := NewAhrefsAPI(os.Getenv("AHREFS_TOKEN"))
 
-	fmt.Println(request(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config)))
+	ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config)
 }
