@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/google/go-querystring/query"
 	"github.com/joho/godotenv"
@@ -26,17 +27,41 @@ type (
 		Mode    string `url:"mode"`
 		Limit   int    `url:"limit,omitempty"`
 		OrderBy string `url:"order_by,omitempty"`
+		where   string `url:"where,omitempty"`
+		having  string `url:"having,omitempty"`
 	}
 
-	// AhrefsRankList - get ahrefs rank item
+	// AhrefsRankList - AhrefsRank -> Page
 	AhrefsRankList struct {
 		URL string `json:"url"`
 		AR  int    `json:"ahrefs_rank"`
 	}
 
-	// AhrefsRank - get ahrefs rank item
+	// AhrefsRank - Contains the URLs and their rankings.
 	AhrefsRank struct {
 		Pages []AhrefsRankList
+	}
+
+	// AnchorsStats - Anchors -> States
+	AnchorsStats struct {
+		Backlinks int
+		Refpages  int
+	}
+
+	// AnchorsAnchors - Anchors -> Anchors
+	AnchorsAnchors struct {
+		Anchor      string
+		Backlinks   int
+		Refpages    int
+		Refdomains  int
+		FirstSeen   time.Time `json:"first_seen"`
+		LastVisited time.Time `json:"last_visited"`
+	}
+
+	// Anchors - Contains the anchor text and the number of backlinks, referring pages and referring domains that has it.
+	Anchors struct {
+		Anchors []AnchorsAnchors
+		Stats   AnchorsStats
 	}
 )
 
@@ -74,7 +99,8 @@ func ahrefsRank(r Request, c *Config) *AhrefsRank {
 
 	ahrefsRank := &AhrefsRank{}
 	decoder := json.NewDecoder(bytes.NewReader(responseData))
-	err := decoder.Decode(&AhrefsRank{})
+
+	err := decoder.Decode(ahrefsRank)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,8 +108,18 @@ func ahrefsRank(r Request, c *Config) *AhrefsRank {
 	return ahrefsRank
 }
 
-func anchors(r Request, c *Config) string {
-	return getURL("anchors", r, c)
+func anchors(r Request, c *Config) *Anchors {
+	responseData := request(getURL("anchors", r, c))
+
+	anchors := &Anchors{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(anchors)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return anchors
 }
 
 func anchorsRefdomains(r Request, c *Config) string {
@@ -182,5 +218,6 @@ func main() {
 
 	config := NewAhrefsAPI(os.Getenv("AHREFS_TOKEN"))
 
-	ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config)
+	fmt.Println(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(anchors(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 }
