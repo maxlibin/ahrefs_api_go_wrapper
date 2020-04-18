@@ -63,6 +63,18 @@ type (
 		Anchors []AnchorsAnchors
 		Stats   AnchorsStats
 	}
+
+	// AnchorsRefdomainsRefdomains - AnchorsRefdomains -> Refdomains
+	AnchorsRefdomainsRefdomains struct {
+		Anchor     string
+		Backlinks  int
+		Refdomains int
+	}
+
+	// AnchorsRefdomains - Contains connection between anchors and domains. Can be used to get all referring domains with specified anchor.
+	AnchorsRefdomains struct {
+		Refdomains []AnchorsRefdomainsRefdomains
+	}
 )
 
 // NewAhrefsAPI initialised the ahrefs api
@@ -122,8 +134,18 @@ func anchors(r Request, c *Config) *Anchors {
 	return anchors
 }
 
-func anchorsRefdomains(r Request, c *Config) string {
-	return getURL("anchors_refdomains", r, c)
+func anchorsRefdomains(r Request, c *Config) *AnchorsRefdomains {
+	responseData := request(getURL("anchors_refdomains", r, c))
+
+	anchorsRefdomains := &AnchorsRefdomains{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(anchorsRefdomains)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return anchorsRefdomains
 }
 
 func backlinks(r Request, c *Config) string {
