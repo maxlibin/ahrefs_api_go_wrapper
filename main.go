@@ -75,6 +75,37 @@ type (
 	AnchorsRefdomains struct {
 		Refdomains []AnchorsRefdomainsRefdomains
 	}
+
+	// SubscriptionInfo - Contains user subscription information.
+	SubscriptionInfo struct {
+		RowsLeft     int `json:"rows_left"`
+		RowsLimit    int `json:"rows_limit"`
+		Subscription string
+	}
+
+	// RefipsRefdomains - Refips -> Refdomains
+	RefipsRefdomains struct {
+		Refip     string
+		Refdomain string
+		Backlinks int
+	}
+
+	// Refips - Returns the referring IP addresses that have at least one link to the target.
+	Refips struct {
+		Refdomains RefipsRefdomains
+	}
+
+	// DomainRatingDomain - Refips -> Refdomains
+	DomainRatingDomain struct {
+		DomainRating string `json:"domain_rating"`
+		AhrefsTop    int    `json:"ahrefs_top"`
+	}
+
+	// DomainRating - Contains the Domain Rating.
+	// Refer to Principles of Domain Rating calculation for more information about Domain Rating.
+	DomainRating struct {
+		Domain DomainRatingDomain
+	}
 )
 
 // NewAhrefsAPI initialised the ahrefs api
@@ -172,8 +203,18 @@ func brokenLinks(r Request, c *Config) string {
 	return getURL("broken_links", r, c)
 }
 
-func domainRating(r Request, c *Config) string {
-	return getURL("domain_rating", r, c)
+func domainRating(r Request, c *Config) *DomainRating {
+	responseData := request(getURL("domain_rating", r, c))
+
+	domainRating := &DomainRating{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(domainRating)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return domainRating
 }
 
 func linkedAnchors(r Request, c *Config) string {
@@ -224,12 +265,32 @@ func refdomainsNewLostCounters(r Request, c *Config) string {
 	return getURL("refdomains_new_lost_counters", r, c)
 }
 
-func refips(r Request, c *Config) string {
-	return getURL("refips", r, c)
+func refips(r Request, c *Config) *Refips {
+	responseData := request(getURL("refips", r, c))
+
+	refips := &Refips{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(refips)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return refips
 }
 
-func subscriptionInfo(r Request, c *Config) string {
-	return getURL("subscription_info", r, c)
+func subscriptionInfo(r Request, c *Config) *SubscriptionInfo {
+	responseData := request(getURL("subscription_info", r, c))
+
+	subscriptionInfo := &SubscriptionInfo{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(subscriptionInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return subscriptionInfo
 }
 
 func main() {
@@ -242,4 +303,7 @@ func main() {
 
 	fmt.Println(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 	fmt.Println(anchors(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(anchorsRefdomains(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(refips(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(domainRating(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 }
