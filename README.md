@@ -10,7 +10,9 @@ if err != nil {
 
 api := NewAhrefsAPI(Config{Token: os.Getenv("AHREFS_TOKEN")})
 
-fmt.Println(request(ahrefsRank("ahrefs.com", "domain", *&api.Token)))
-fmt.Println(request(anchors("ahrefs.com", "domain", *&api.Token)))
-
+fmt.Println(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(anchors(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(anchorsRefdomains(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(refips(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(domainRating(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 ```
