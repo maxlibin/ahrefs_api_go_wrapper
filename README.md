@@ -15,4 +15,7 @@ fmt.Println(anchors(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 fmt.Println(anchorsRefdomains(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 fmt.Println(refips(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 fmt.Println(domainRating(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(backlinks(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(backlinksNewLost(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+fmt.Println(backlinksOnePerDomain(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 ```

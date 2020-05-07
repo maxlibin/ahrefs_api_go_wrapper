@@ -44,16 +44,16 @@ type (
 
 	// AnchorsStats - Anchors -> States
 	AnchorsStats struct {
-		Backlinks int
-		Refpages  int
+		Backlinks int `json:"backlinks"`
+		Refpages  int `json:"refpages"`
 	}
 
 	// AnchorsAnchors - Anchors -> Anchors
 	AnchorsAnchors struct {
-		Anchor      string
-		Backlinks   int
-		Refpages    int
-		Refdomains  int
+		Anchor      string    `json:"anchor"`
+		Backlinks   int       `json:"backlinks"`
+		Refpages    int       `json:"refpages"`
+		Refdomains  int       `json:"refdomains"`
 		FirstSeen   time.Time `json:"first_seen"`
 		LastVisited time.Time `json:"last_visited"`
 	}
@@ -66,9 +66,9 @@ type (
 
 	// AnchorsRefdomainsRefdomains - AnchorsRefdomains -> Refdomains
 	AnchorsRefdomainsRefdomains struct {
-		Anchor     string
-		Backlinks  int
-		Refdomains int
+		Anchor     string `json:"anchor"`
+		Backlinks  int    `json:"backlinks"`
+		Refdomains int    `json:"refdomains"`
 	}
 
 	// AnchorsRefdomains - Contains connection between anchors and domains. Can be used to get all referring domains with specified anchor.
@@ -76,18 +76,54 @@ type (
 		Refdomains []AnchorsRefdomainsRefdomains
 	}
 
+	// BacklinksRefPages - Backlinks - RefPages
+	BacklinksRefPages struct {
+		Date             time.Time
+		Type             string
+		From             string    `json:"url_from"`
+		To               string    `json:"url_to"`
+		AR               int       `json:"ahrefs_rank"`
+		DomainRating     int       `json:"domain_rating"`
+		AhrefsTop        int       `json:"ahrefs_top"`
+		IPFrom           string    `json:"ip_from"`
+		LinksInternal    int       `json:"links_internal"`
+		LinksExternal    int       `json:"links_external"`
+		PageSize         int       `json:"page_size"`
+		Encoding         string    `json:"encoding"`
+		Language         string    `json:"language"`
+		Title            string    `json:"title"`
+		FirstSeen        time.Time `json:"first_seen"`
+		LastVisited      time.Time `json:"last_visited"`
+		PrevVisited      time.Time `json:"prev_visited"`
+		Original         bool      `json:"original"`
+		LinkType         string    `json:"link_type"`
+		Redirect         int       `json:"redirect"`
+		NoFollow         bool      `json:"nofollow"`
+		Alt              string    `json:"alt"`
+		Anchor           string    `json:"anchor"`
+		TextPrev         string    `json:"text_pre"`
+		TextPost         string    `json:"text_post"`
+		HttoCode         int       `json:"http_code"`
+		URLFromFirstSeen string    `json:"url_from_first_seen"` // time.Time type parsing error in here...
+	}
+
+	// Backlinks - Contains the backlinks and details of the referring pages, such as anchor and page title.
+	Backlinks struct {
+		RefPages []BacklinksRefPages
+	}
+
 	// SubscriptionInfo - Contains user subscription information.
 	SubscriptionInfo struct {
-		RowsLeft     int `json:"rows_left"`
-		RowsLimit    int `json:"rows_limit"`
-		Subscription string
+		RowsLeft     int    `json:"rows_left"`
+		RowsLimit    int    `json:"rows_limit"`
+		Subscription string `json:"subscription"`
 	}
 
 	// RefipsRefdomains - Refips -> Refdomains
 	RefipsRefdomains struct {
-		Refip     string
-		Refdomain string
-		Backlinks int
+		Refip     string `json:"refip"`
+		Refdomain string `json:"refdomain"`
+		Backlinks int    `json:"backlinks"`
 	}
 
 	// Refips - Returns the referring IP addresses that have at least one link to the target.
@@ -179,20 +215,50 @@ func anchorsRefdomains(r Request, c *Config) *AnchorsRefdomains {
 	return anchorsRefdomains
 }
 
-func backlinks(r Request, c *Config) string {
-	return getURL("backlinks", r, c)
+func backlinks(r Request, c *Config) *Backlinks {
+	responseData := request(getURL("backlinks", r, c))
+
+	backlinks := &Backlinks{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(backlinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return backlinks
 }
 
-func backlinksNewLost(r Request, c *Config) string {
-	return getURL("backlinks_new_lost", r, c)
+func backlinksNewLost(r Request, c *Config) *Backlinks {
+	responseData := request(getURL("backlinks_new_lost", r, c))
+
+	backlinks := &Backlinks{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(backlinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return backlinks
 }
 
 func backlinksNewLostCounters(r Request, c *Config) string {
 	return getURL("backlinks_new_lost_counters", r, c)
 }
 
-func backlinksOnePerDomain(r Request, c *Config) string {
-	return getURL("backlinks_one_per_domain", r, c)
+func backlinksOnePerDomain(r Request, c *Config) *Backlinks {
+	responseData := request(getURL("backlinks_one_per_domain", r, c))
+
+	backlinks := &Backlinks{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(backlinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return backlinks
 }
 
 func brokenBacklinks(r Request, c *Config) string {
@@ -306,4 +372,7 @@ func main() {
 	fmt.Println(anchorsRefdomains(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 	fmt.Println(refips(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 	fmt.Println(domainRating(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(backlinks(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(backlinksNewLost(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(backlinksOnePerDomain(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 }
