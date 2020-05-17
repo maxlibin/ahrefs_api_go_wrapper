@@ -78,8 +78,8 @@ type (
 
 	// BacklinksRefPages - Backlinks - RefPages
 	BacklinksRefPages struct {
-		Date             time.Time
-		Type             string
+		Date             time.Time `json:"date"`
+		Type             string    `json:"type"`
 		From             string    `json:"url_from"`
 		To               string    `json:"url_to"`
 		AR               int       `json:"ahrefs_rank"`
@@ -103,12 +103,14 @@ type (
 		Anchor           string    `json:"anchor"`
 		TextPrev         string    `json:"text_pre"`
 		TextPost         string    `json:"text_post"`
-		HttoCode         int       `json:"http_code"`
+		HTTPCode         int       `json:"http_code"`
 		URLFromFirstSeen string    `json:"url_from_first_seen"` // time.Time type parsing error in here..
 		New              int       `json:"new"`
 		Lost             int       `json:"lost"`
 		NewTotal         int       `json:"new_total"`
 		LostTotal        int       `json:"lost_total"`
+		BrokenAt         time.Time `json:"broken_at"`
+		Error            string    `json:"error"`
 	}
 
 	// Backlinks - Contains the backlinks and details of the referring pages, such as anchor and page title.
@@ -279,12 +281,32 @@ func backlinksOnePerDomain(r Request, c *Config) *Backlinks {
 	return backlinks
 }
 
-func brokenBacklinks(r Request, c *Config) string {
-	return getURL("broken_backlinks", r, c)
+func brokenBacklinks(r Request, c *Config) *Backlinks {
+	responseData := request(getURL("broken_backlinks", r, c))
+
+	backlinks := &Backlinks{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(backlinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return backlinks
 }
 
-func brokenLinks(r Request, c *Config) string {
-	return getURL("broken_links", r, c)
+func brokenLinks(r Request, c *Config) *Backlinks {
+	responseData := request(getURL("broken_links", r, c))
+
+	backlinks := &Backlinks{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	err := decoder.Decode(backlinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return backlinks
 }
 
 func domainRating(r Request, c *Config) *DomainRating {
@@ -385,13 +407,19 @@ func main() {
 
 	config := NewAhrefsAPI(os.Getenv("AHREFS_TOKEN"))
 
-	fmt.Println(ahrefsRank(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(anchors(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(anchorsRefdomains(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(refips(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(domainRating(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(backlinks(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(backlinksNewLost(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(backlinksOnePerDomain(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
-	fmt.Println(backlinksNewLostCounters(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	request := Request{Target: "ahrefs.com", Mode: "domain"}
+
+	fmt.Println(ahrefsRank(request, &config))
+	fmt.Println(anchors(request, &config))
+	fmt.Println(anchorsRefdomains(request, &config))
+	fmt.Println(refips(request, &config))
+	fmt.Println(domainRating(request, &config))
+	fmt.Println(backlinks(request, &config))
+	fmt.Println(backlinksNewLost(request, &config))
+	fmt.Println(backlinksOnePerDomain(request, &config))
+	fmt.Println(backlinksNewLostCounters(request, &config))
+	fmt.Println(backlinksNewLostCounters(request, &config))
+	fmt.Println(backlinksNewLostCounters(request, &config))
+	fmt.Println(brokenBacklinks(request, &config))
+	fmt.Println(brokenLinks(request, &config))
 }
