@@ -104,7 +104,11 @@ type (
 		TextPrev         string    `json:"text_pre"`
 		TextPost         string    `json:"text_post"`
 		HttoCode         int       `json:"http_code"`
-		URLFromFirstSeen string    `json:"url_from_first_seen"` // time.Time type parsing error in here...
+		URLFromFirstSeen string    `json:"url_from_first_seen"` // time.Time type parsing error in here..
+		New              int       `json:"new"`
+		Lost             int       `json:"lost"`
+		NewTotal         int       `json:"new_total"`
+		LostTotal        int       `json:"lost_total"`
 	}
 
 	// Backlinks - Contains the backlinks and details of the referring pages, such as anchor and page title.
@@ -243,8 +247,22 @@ func backlinksNewLost(r Request, c *Config) *Backlinks {
 	return backlinks
 }
 
-func backlinksNewLostCounters(r Request, c *Config) string {
-	return getURL("backlinks_new_lost_counters", r, c)
+func backlinksNewLostCounters(r Request, c *Config) *Backlinks {
+	responseData := request(getURL("backlinks_new_lost_counters", r, c))
+
+	backlinks := &Backlinks{}
+	decoder := json.NewDecoder(bytes.NewReader(responseData))
+
+	fmt.Println(responseData)
+
+	err := decoder.Decode(backlinks)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(backlinks)
+
+	return backlinks
 }
 
 func backlinksOnePerDomain(r Request, c *Config) *Backlinks {
@@ -375,4 +393,5 @@ func main() {
 	fmt.Println(backlinks(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 	fmt.Println(backlinksNewLost(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 	fmt.Println(backlinksOnePerDomain(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
+	fmt.Println(backlinksNewLostCounters(Request{Target: "ahrefs.com", Mode: "domain"}, &config))
 }
